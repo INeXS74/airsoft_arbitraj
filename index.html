@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Audio Airsoft</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png"> <!-- Pentru iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes"> <!-- Pentru iOS -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"> <!-- Pentru iOS -->
+    <script>
+    // Înregistrează Service Worker-ul
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(registration => {
+            console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+            });
+        });
+    }
+    </script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --background-light: #ecf0f1;
+            --text-color: #2c3e50;
+            --button-text-color: white;
+            --disabled-color: #bdc3c7;
+            --border-color: #95a5a6;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between; /* Distribuie spațiu între elemente */
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right bottom, #f0f4f7, #dae4ea);
+            color: var(--text-color);
+            padding: 10px;
+            box-sizing: border-box;
+            overflow: hidden;
+            user-select: none; /* Previne selectarea textului accidental */
+        }
+
+        .header-container {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 5px;
+            flex-shrink: 0; /* Previne micșorarea excesivă */
+        }
+
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 5px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* --- CRONOMETRU PRINCIPAL --- */
+        .timer-display {
+            font-family: 'Roboto', monospace;
+            font-weight: 900;
+            font-size: clamp(4em, 18vw, 7em); 
+            color: var(--text-color);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px 0;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin: 10px 0;
+            text-align: center;
+            width: 95%;
+            max-width: 600px;
+            border: 4px solid transparent;
+            line-height: 1;
+        }
+        
+        .timer-display.prep {
+            color: var(--warning-color);
+            border-color: var(--warning-color);
+            font-size: clamp(2em, 10vw, 4em); /* Mai mic pentru text */
+        }
+        
+        .timer-display.running {
+            color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .timer-display.stopped {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            background-color: #fff5f5;
+        }
+
+        /* --- ORA START/FINAL --- */
+        .real-time-display {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            font-family: 'Roboto', monospace;
+            font-size: clamp(1em, 4vw, 1.5em);
+            font-weight: 700;
+            color: var(--text-color);
+            margin-top: 10px; /* Spațiu deasupra */
+            margin-bottom: 5px;
+            flex-shrink: 0;
+        }
+        .real-time-display div {
+            margin: 5px 0;
+            padding: 5px 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 5px;
+        }
+        .real-time-display #startTimeDisplay { color: var(--success-color); }
+        .real-time-display #endTimeDisplay { color: var(--secondary-color); }
+
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto; /* Spațiu sus-jos și centrare orizontală */
+            flex-grow: 1; /* Permite containerului să ocupe spațiul disponibil */
+            justify-content: center;
+            align-items: center;
+        }
+
+        button {
+            cursor: pointer;
+            border-radius: 0; /* Pătrate */
+            border: 2px solid var(--border-color);
+            color: var(--button-text-color);
+            font-weight: 700;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+            text-transform: uppercase;
+            outline: none;
+            aspect-ratio: 1 / 1; /* Pătrat perfect */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: clamp(1.2em, 6vmin, 2.5em); 
+            line-height: 1.2;
+            width: 100%;
+            max-width: 350px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+
+        button:disabled {
+            background-color: var(--disabled-color) !important;
+            cursor: not-allowed;
+            border-color: #cccccc;
+            box-shadow: none;
+        }
+
+        #startBtn { background: linear-gradient(145deg, var(--success-color), #27ae60); }
+        #hornBtn { background: linear-gradient(145deg, var(--secondary-color), #c0392b); }
+
+        .status-message {
+            margin-top: 5px;
+            font-size: clamp(0.9em, 3vw, 1.2em);
+            font-weight: 700;
+            color: var(--text-color);
+            min-height: 1.5em;
+            text-align: center;
+            flex-shrink: 0;
+            padding-bottom: 10px;
+        }
+        .status-message.error { color: var(--secondary-color); }
+        .status-message.success { color: var(--success-color); }
+
+        /* Ajustări pentru Landscape (Păstrează aranjamentul vertical, dar ajustează dimensiuni) */
+        @media (orientation: landscape) {
+            body {
+                padding: 5px; /* Mai puțin padding pentru a câștiga spațiu */
+            }
+            .header-container, .timer-display, .button-container, .real-time-display, .status-message {
+                max-width: 90%; /* Elemente mai late în landscape */
+            }
+            .logo {
+                max-width: 100px; /* Logo mai mic */
+            }
+            .timer-display {
+                font-size: clamp(3em, 12vh, 6em); /* Ajustat pe înălțime (vh) */
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+            .button-container {
+                flex-direction: row; /* Butoanele unul lângă altul în landscape */
+                gap: 15px;
+                max-width: 600px;
+                margin: 5px auto;
+            }
+            .button-container button {
+                width: 45%; /* Fiecare buton ocupă ~45% din lățimea containerului */
+                max-width: 280px;
+                font-size: clamp(1em, 7vh, 2em);
+            }
+            .real-time-display {
+                font-size: clamp(0.9em, 2.5vh, 1.2em);
+                margin-top: 5px;
+                margin-bottom: 2px;
+            }
+            .status-message {
+                font-size: clamp(0.8em, 2vh, 1em);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER CU LOGO -->
+    <div class="header-container">
+        <img src="logo_federatie.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <h3 style="margin:0; opacity: 0.6;">TIMER SPEEDSOFTRO</h3>
+    </div>
+
+    <!-- AUDIO PLAYER ASCUNS (.wav) -->
+    <audio id="airsoftAudio" src="competitie_audio.mp3" preload="auto"></audio>
+
+    <!-- CRONOMETRU PRINCIPAL -->
+    <div id="timerDisplay" class="timer-display">00:00</div>
+
+    <!-- BUTOANE -->
+    <div class="button-container">
+        <button id="startBtn">▶️ <br> START</button>
+        <button id="hornBtn">🛑 <br> FINAL <br> Repriză</button>
+    </div>
+
+    <!-- ORA START/FINAL (CEASURI FIZICE) -->
+    <div class="real-time-display">
+        <div id="startTimeDisplay">Ora start: --:--:--</div>
+        <div id="endTimeDisplay">Ora final: --:--:--</div>
+    </div>
+
+    <!-- MESAJE STATUS -->
+    <div id="statusMessage" class="status-message">Se încarcă sistemul...</div>
+
+    <script>
+        const audioPlayer = document.getElementById('airsoftAudio');
+        const startButton = document.getElementById('startBtn');
+        const hornButton = document.getElementById('hornBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startTimeDisplay = document.getElementById('startTimeDisplay');
+        const endTimeDisplay = document.getElementById('endTimeDisplay');
+
+        // --- CONFIGURĂRI IMPORTANTE ---
+        const END_SEGMENT_LENGTH_SECONDS = 5;      // Cât durează goarna de final în fișierul audio
+        const START_DELAY_SECONDS = 15;             // Câte secunde "pregătire" înainte de startul real al cronometrului
+        const MAX_GAME_DURATION_SECONDS = 3 * 60;   // Durata maximă de joc afișată, 3 minute (180 secunde)
+        
+        let audioDuration = 0;
+        let animationFrameId; 
+        let isGameRunning = false; 
+
+        let actualStartTime = null; // Stochează obiectul Date pentru ora de start reală (la START_DELAY_SECONDS)
+        let actualEndTime = null;   // Stochează obiectul Date pentru ora de final reală
+        let hasActualGameStarted = false; // Flag pentru a captura actualStartTime o singură dată
+
+        // Funcție formatare timp MM:SS
+        function formatTime(seconds) {
+            if (seconds < 0) seconds = 0;
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Funcție formatare ora reală HH:MM:SS
+        function formatRealTime(date) {
+            if (!date) return '--:--:--';
+            const h = date.getHours().toString().padStart(2, '0');
+            const m = date.getMinutes().toString().padStart(2, '0');
+            const s = date.getSeconds().toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        function updateStatus(message, type = '') {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+        }
+
+        // Funcție Fullscreen
+        function requestFullscreen() {
+            const doc = document.documentElement;
+            if (doc.requestFullscreen) doc.requestFullscreen();
+            else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+        }
+
+        // --- BUCLA PRINCIPALĂ (rulează de 60 de ori pe secundă) ---
+        function gameLoop() {
+            if (!isGameRunning) return;
+
+            const currentTime = audioPlayer.currentTime;
+            let gameTimeForDisplay;
+
+            // 1. Zona de PREGĂTIRE (0 - START_DELAY_SECONDS)
+            if (currentTime < START_DELAY_SECONDS) {
+                const prepTimeLeft = Math.ceil(START_DELAY_SECONDS - currentTime);
+                timerDisplay.textContent = `PREGĂTIRE: ${prepTimeLeft}`;
+                timerDisplay.className = 'timer-display prep';
+                hasActualGameStarted = false; // Resetăm flag-ul
+                animationFrameId = requestAnimationFrame(gameLoop); 
+                return; 
+            } 
+            
+            // --- CAPTURA ORA REALĂ DE START, LA START_DELAY_SECONDS ---
+            if (!hasActualGameStarted && currentTime >= START_DELAY_SECONDS) {
+                actualStartTime = new Date(); // Capturăm ora exactă
+                startTimeDisplay.textContent = "Ora start: " + formatRealTime(actualStartTime);
+                hasActualGameStarted = true; // Setăm flag-ul pentru a nu mai captura
+            }
+
+            // 2. Zona de JOC (de la START_DELAY_SECONDS până la FINAL)
+            gameTimeForDisplay = currentTime - START_DELAY_SECONDS;
+
+            // Limitează cronometrul afișat la MAX_GAME_DURATION_SECONDS
+            if (gameTimeForDisplay >= MAX_GAME_DURATION_SECONDS) {
+                gameTimeForDisplay = MAX_GAME_DURATION_SECONDS;
+                if (isGameRunning) { // Verificăm că jocul era încă "running"
+                    isGameRunning = false; 
+                    cancelAnimationFrame(animationFrameId);
+                    timerDisplay.textContent = formatTime(MAX_GAME_DURATION_SECONDS);
+                    timerDisplay.className = 'timer-display stopped';
+                    updateStatus("Timp regulamentar atins (3:00). Audio continuă.", "error");
+
+                    // Setăm ora de final (ceas fizic) doar dacă nu a fost deja setată
+                    if (!actualEndTime) { 
+                        actualEndTime = new Date();
+                        endTimeDisplay.textContent = "Ora final: " + formatRealTime(actualEndTime);
+                    }
+                    return; // Terminăm execuția gameLoop aici
+                }
+            }
+
+            // Actualizare normală a cronometrului de joc
+            timerDisplay.textContent = formatTime(gameTimeForDisplay);
+            timerDisplay.className = 'timer-display running';
+
+            animationFrameId = requestAnimationFrame(gameLoop); 
+        }
+
+        // Inițializare
+        audioPlayer.onloadedmetadata = () => {
+            audioDuration = audioPlayer.duration;
+            startButton.disabled = false;
+            hornButton.disabled = false;
+            updateStatus("Sistem pregătit. Apasă START.");
+        };
+
+        audioPlayer.onerror = () => {
+            updateStatus("EROARE: Nu găsesc 'competitie_audio.mp3'", "error");
+        };
+
+        // --- BUTON START ---
+        startButton.addEventListener('click', () => {
+            requestFullscreen(); 
+            
+            // Resetăm starea și variabilele
+            isGameRunning = true;
+            audioPlayer.currentTime = 0;
+            actualStartTime = null; // Resetăm ora de start (va fi capturată la START_DELAY_SECONDS)
+            actualEndTime = null; 
+            hasActualGameStarted = false; // Resetăm flag-ul pentru captură
+            startTimeDisplay.textContent = "Ora start: --:--:--"; // Afișăm placeholder
+            endTimeDisplay.textContent = "Ora final: --:--:--";
+            
+            audioPlayer.play().then(() => {
+                updateStatus("Joc în desfășurare...", "success");
+                cancelAnimationFrame(animationFrameId);
+                gameLoop(); 
+            }).catch(e => updateStatus("Eroare redare: " + e, "error"));
+        });
+
+        // --- BUTON FINAL (OPRIRE MANUALĂ) ---
+        hornButton.addEventListener('click', () => {
+            if (audioDuration > 0 && isGameRunning) {
+                isGameRunning = false; 
+                cancelAnimationFrame(animationFrameId);
+                audioPlayer.pause(); // Oprim imediat orice sunet
+
+                // Capturăm ora de final (ceas fizic)
+                actualEndTime = new Date();
+                endTimeDisplay.textContent = "Ora final: " + formatRealTime(actualEndTime);
+
+                const currentAudioTime = audioPlayer.currentTime;
+
+                // Verificăm dacă suntem în perioada de pregătire
+                if (currentAudioTime < START_DELAY_SECONDS) {
+                    // Dacă oprirea se face în faza de pregătire
+                    timerDisplay.textContent = "00:00"; // Jocul nu a început, timpul e 0
+                    timerDisplay.className = 'timer-display stopped';
+                    updateStatus("Pregătire oprită. Repriză ANULATĂ.", "error");
+                    
+                    // Asigurăm că Ora Start rămâne --:--:-- dacă nu a apucat să înceapă jocul
+                    if (!hasActualGameStarted) {
+                        startTimeDisplay.textContent = "Ora start: --:--:--";
+                    }
+                    // NU redăm goarna de final
+                } else {
+                    // Dacă oprirea se face în timpul reprizei efective
+                    let finalGameTime = currentAudioTime - START_DELAY_SECONDS;
+                    
+                    // Cap finalGameTime la 3:00 minute, chiar și la oprire manuală
+                    if (finalGameTime > MAX_GAME_DURATION_SECONDS) {
+                        finalGameTime = MAX_GAME_DURATION_SECONDS;
+                    }
+
+                    timerDisplay.textContent = formatTime(finalGameTime);
+                    timerDisplay.className = 'timer-display stopped';
+                    updateStatus("Joc oprit manual!", "error");
+
+                    // Mutăm audio la goarnă și o redăm
+                    const hornStartTime = Math.max(0, audioDuration - END_SEGMENT_LENGTH_SECONDS);
+                    audioPlayer.currentTime = hornStartTime;
+                    audioPlayer.play();
+
+                    setTimeout(() => {
+                        audioPlayer.pause();
+                    }, END_SEGMENT_LENGTH_SECONDS * 1000);
+                }
+            }
+        });
+
+        // --- FINAL NATURAL (Audio ajunge la capăt) ---
+        audioPlayer.onended = () => {
+            isGameRunning = false;
+            cancelAnimationFrame(animationFrameId);
+            
+            // Setăm ora de final, dacă nu a fost deja setată de oprirea la 3:00
+            if (!actualEndTime) { 
+                actualEndTime = new Date();
+                endTimeDisplay.textContent = "Ora final: " + formatRealTime(actualEndTime);
+            }
+
+            // Verificăm dacă jocul a apucat să înceapă (după START_DELAY_SECONDS)
+            if (!hasActualGameStarted) { 
+                timerDisplay.textContent = "00:00";
+                timerDisplay.className = 'timer-display stopped';
+                updateStatus("Repriză ANULATĂ (Audio s-a terminat în pregătire).", "error");
+                // Asigurăm că Ora Start rămâne --:--:--
+                startTimeDisplay.textContent = "Ora start: --:--:--";
+            } else { 
+                // Aici jocul a rulat cel puțin până la START_DELAY_SECONDS
+                let totalGameTime = audioDuration - START_DELAY_SECONDS;
+                if (totalGameTime > MAX_GAME_DURATION_SECONDS) totalGameTime = MAX_GAME_DURATION_SECONDS;
+
+                timerDisplay.textContent = formatTime(totalGameTime);
+                timerDisplay.className = 'timer-display stopped';
+                updateStatus("Timp expirat (Final natural).", "error");
+            }
+        };
+    </script>
+</body>
+</html>
