@@ -5,24 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control Audio Airsoft</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png"> <!-- Pentru iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes"> <!-- Pentru iOS -->
-    <meta name="apple-mobile-web-app-status-bar-style" content="black"> <!-- Pentru iOS -->
-    <script>
-    // Înregistrează Service Worker-ul
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-            .then(registration => {
-            console.log('SW registered: ', registration);
-            })
-            .catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
-            });
-        });
-    }
-    </script>
     <style>
         :root {
             --primary-color: #3498db;
@@ -42,11 +24,11 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-between; /* Distribuie spațiu între elemente */
-            min-height: 100vh;
+            min-height: 100svh; /* AICI ESTE MODIFICAREA CHEIE! Folosim svh */
             margin: 0;
             background: linear-gradient(to right bottom, #f0f4f7, #dae4ea);
             color: var(--text-color);
-            padding: 10px;
+            padding: 5px; /* Am redus puțin padding-ul pentru a câștiga spațiu */
             box-sizing: border-box;
             overflow: hidden;
             user-select: none; /* Previne selectarea textului accidental */
@@ -184,7 +166,7 @@
             min-height: 1.5em;
             text-align: center;
             flex-shrink: 0;
-            padding-bottom: 10px;
+            padding-bottom: 5px; /* Am redus puțin padding-ul */
         }
         .status-message.error { color: var(--secondary-color); }
         .status-message.success { color: var(--success-color); }
@@ -223,6 +205,7 @@
             }
             .status-message {
                 font-size: clamp(0.8em, 2vh, 1em);
+                padding-bottom: 0px; /* Eliminat padding-ul de jos */
             }
         }
     </style>
@@ -368,7 +351,7 @@
         };
 
         audioPlayer.onerror = () => {
-            updateStatus("EROARE: Nu găsesc 'competitie_audio.mp3'", "error");
+            updateStatus("EROARE: Nu găsesc 'competitie_audio.wav'", "error");
         };
 
         // --- BUTON START ---
