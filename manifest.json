@@ -1,7 +1,7 @@
 {
   "name": "Airsoft Arbitraj",
   "short_name": "Airsoft",
-  "start_url": "/airsoft-arbitraj/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#dae4ea",
   "theme_color": "#3498db",
