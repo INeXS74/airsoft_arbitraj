@@ -21,53 +21,47 @@
         body {
             font-family: 'Roboto', sans-serif;
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Implicit: coloană pentru Portret */
             align-items: center;
-            /* MODIFICAT: space-between poate împinge elementele afară. Folosim flex-start cu gap */
-            justify-content: flex-start; 
-            min-height: 100svh; 
+            justify-content: flex-start;
+            min-height: 100svh;
             margin: 0;
             background: linear-gradient(to right bottom, #f0f4f7, #dae4ea);
             color: var(--text-color);
             padding: 10px;
             box-sizing: border-box;
-            /* MODIFICAT: Permitem scroll pe verticală dacă nu încape conținutul */
-            overflow-y: auto; 
+            overflow-y: auto; /* Permite scroll vertical */
             user-select: none;
-            gap: 10px; /* Spațiu consistent între toate elementele majore */
+            gap: 10px;
         }
+
+        /* --- STILURI GENERALE (PORTRET) --- */
 
         .header-container {
             width: 100%;
             max-width: 600px;
             text-align: center;
-            flex-shrink: 0; 
+            flex-shrink: 0;
         }
 
         .logo {
-            max-width: 100px; /* Ușor micșorat pentru a salva spațiu */
+            max-width: 100px;
             height: auto;
             margin-bottom: 5px;
             display: block;
             margin-left: auto;
             margin-right: auto;
         }
-        
-        h3 {
-             margin: 0; 
-             opacity: 0.8;
-             font-size: 1.2rem;
-        }
 
-        /* --- CRONOMETRU PRINCIPAL --- */
+        h3 { margin: 0; opacity: 0.8; font-size: 1.2rem; }
+
         .timer-display {
             font-family: 'Roboto', monospace;
             font-weight: 900;
-            /* Ajustat font-size pentru a fi sigur că nu e prea masiv */
-            font-size: clamp(3.5em, 15vw, 6em); 
+            font-size: clamp(3.5em, 15vw, 6em);
             color: var(--text-color);
             background-color: rgba(255, 255, 255, 0.9);
-            padding: 5px 0; /* Padding redus */
+            padding: 5px 0;
             border-radius: 15px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             text-align: center;
@@ -75,43 +69,28 @@
             max-width: 600px;
             border: 4px solid transparent;
             line-height: 1.1;
-            flex-shrink: 0; /* Nu lăsa cronometrul să se strivească */
-        }
-        
-        .timer-display.prep {
-            color: var(--warning-color);
-            border-color: var(--warning-color);
-            font-size: clamp(2em, 8vw, 4em);
-        }
-        
-        .timer-display.running {
-            color: var(--success-color);
-            border-color: var(--success-color);
-        }
-        
-        .timer-display.stopped {
-            color: var(--secondary-color);
-            border-color: var(--secondary-color);
-            background-color: #fff5f5;
+            flex-shrink: 0;
         }
 
-        /* --- BUTOANE --- */
+        .timer-display.prep { color: var(--warning-color); border-color: var(--warning-color); font-size: clamp(2em, 8vw, 4em); }
+        .timer-display.running { color: var(--success-color); border-color: var(--success-color); }
+        .timer-display.stopped { color: var(--secondary-color); border-color: var(--secondary-color); background-color: #fff5f5; }
+
         .button-container {
             display: flex;
             flex-direction: column;
             gap: 15px;
             width: 100%;
             max-width: 400px;
-            /* Aceasta va permite butoanelor să ocupe spațiul rămas, dar nu forțat */
-            flex-grow: 1; 
-            min-height: 200px; /* Înălțime minimă garantată */
+            flex-grow: 1;
+            min-height: 200px;
             justify-content: center;
             align-items: center;
         }
 
         button {
             cursor: pointer;
-            border-radius: 10px; /* Ușor rotunjite, arată mai bine dacă nu sunt perfect pătrate */
+            border-radius: 10px;
             border: 2px solid var(--border-color);
             color: var(--button-text-color);
             font-weight: 700;
@@ -119,36 +98,26 @@
             transition: transform 0.1s;
             text-transform: uppercase;
             outline: none;
-            /* MODIFICAT: aspect-ratio scos pentru a permite flexibilitate dacă ecranul e scurt */
             width: 100%;
-            height: 100%; /* Încearcă să umple containerul */
-            max-height: 350px; /* Dar nu mai mult de atât */
+            height: 100%;
+            max-height: 350px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: clamp(1.2em, 5vmin, 2.2em); 
+            font-size: clamp(1.2em, 5vmin, 2.2em);
             line-height: 1.2;
             -webkit-tap-highlight-color: transparent;
             padding: 10px;
         }
 
-        button:active:not(:disabled) {
-            transform: scale(0.96);
-        }
-
-        button:disabled {
-            background-color: var(--disabled-color) !important;
-            cursor: not-allowed;
-            border-color: #cccccc;
-            box-shadow: none;
-        }
+        button:active:not(:disabled) { transform: scale(0.96); }
+        button:disabled { background-color: var(--disabled-color) !important; cursor: not-allowed; border-color: #cccccc; box-shadow: none; }
 
         #startBtn { background: linear-gradient(145deg, var(--success-color), #27ae60); }
         #hornBtn { background: linear-gradient(145deg, var(--secondary-color), #c0392b); }
 
-        /* --- ORA START/FINAL --- */
         .real-time-display {
             width: 100%;
             max-width: 600px;
@@ -159,15 +128,17 @@
             color: var(--text-color);
             flex-shrink: 0;
             display: flex;
-            justify-content: space-around; /* Le punem pe același rând să salvăm spațiu vertical */
+            justify-content: space-around;
             gap: 10px;
         }
+
         .real-time-display div {
             padding: 5px 10px;
             background-color: rgba(255, 255, 255, 0.7);
             border-radius: 5px;
-            flex: 1; /* Ocupă spațiu egal */
+            flex: 1;
         }
+
         .real-time-display #startTimeDisplay { color: var(--success-color); border: 1px solid var(--success-color); }
         .real-time-display #endTimeDisplay { color: var(--secondary-color); border: 1px solid var(--secondary-color); }
 
@@ -183,82 +154,97 @@
         .status-message.error { color: var(--secondary-color); }
         .status-message.success { color: var(--success-color); }
 
-        /* Ajustări pentru Landscape */
+        /* --- LAYOUT SPECIAL PENTRU LANDSCAPE (DOUĂ COLOANE) --- */
         @media (orientation: landscape) {
             body {
-                flex-direction: row; 
+                flex-direction: row; /* Schimbăm direcția principală în rând */
+                align-items: center; /* Centrăm vertical */
+                justify-content: center; /* Centrăm orizontal */
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .header-container {
+                display: none; /* Ascundem headerul în landscape pentru a salva spațiu */
+            }
+
+            /* Coloana Stângă - Doar Cronometrul */
+            .timer-display {
+                width: 45%; /* Ocupă aproape jumătate din ecran */
+                height: 80vh; /* Înalt cât ecranul */
+                font-size: clamp(4em, 20vh, 10em); /* Font uriaș */
+                display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: 10px;
-                overflow-y: auto; /* Permite scroll și în landscape */
+                margin: 0;
+                order: 1; /* Primul element */
             }
-            .header-container { display: none; } /* Ascunde headerul în landscape */
-            
-            .left-column {
+
+            /* Wrapper pentru Coloana Dreaptă (Butoane + Info) */
+            .controls-wrapper {
                 display: flex;
                 flex-direction: column;
-                width: 45%;
-                align-items: center;
-                justify-content: center;
+                width: 50%; /* Cealaltă jumătate */
+                height: 85vh;
+                justify-content: space-between;
+                order: 2; /* Al doilea element */
                 gap: 10px;
             }
-            
-            .right-column {
-                display: flex;
-                flex-direction: column;
-                width: 50%;
-                height: 90vh;
-                justify-content: center;
-            }
 
-            .timer-display {
-                font-size: clamp(3em, 12vh, 6em);
+            /* Re-aranjăm butoanele în landscape */
+            .button-container {
+                flex-direction: row; /* Butoanele unul lângă altul */
                 width: 100%;
+                max-width: none;
+                height: 60%; /* Ocupă 60% din înălțimea coloanei drepte */
+                min-height: auto;
+                gap: 15px;
             }
 
+            button {
+                width: 50%;
+                height: 100%;
+                max-height: none;
+                font-size: clamp(1.5em, 4vw, 2.5em);
+            }
+
+            /* Orele și Statusul sub butoane */
             .real-time-display {
-                flex-direction: column;
+                width: 100%;
+                flex-direction: column; /* Orele una sub alta */
                 gap: 5px;
             }
             
-            .button-container {
-                flex-direction: row;
-                width: 100%;
-                max-width: none;
-                height: 100%;
-                gap: 10px;
-            }
-            button {
-                width: 48%;
-                height: 100%;
-                max-height: none;
+            .status-message {
+                padding-bottom: 0;
+                text-align: right; /* Aliniat la dreapta sub controale */
             }
         }
         
-        /* Pentru ecrane mici Portrait, ascundem logo-ul să facem loc butoanelor */
-        @media (orientation: portrait) and (max-height: 700px) {
-            .logo { display: none; }
+        /* Fallback pentru telefoane mici în landscape */
+        @media (orientation: landscape) and (max-height: 500px) {
+             .timer-display { font-size: 3em; }
+             button { font-size: 1.2em; }
         }
     </style>
 </head>
 <body>
     
-    <!-- WRAPPER PENTRU LANDSCAPE - doar structură logică -->
-    <div style="display:contents" class="portrait-layout">
+    <!-- HEADER CU LOGO (Vizibil doar în Portret) -->
+    <div class="header-container">
+        <img src="logo_federatie.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <h3>TIMER SPEEDSOFTRO</h3>
+    </div>
+
+    <!-- AUDIO PLAYER ASCUNS (.mp3) -->
+    <audio id="airsoftAudio" src="competitie_audio.mp3" preload="auto"></audio>
+
+    <!-- CRONOMETRU PRINCIPAL -->
+    <div id="timerDisplay" class="timer-display">00:00</div>
+
+    <!-- WRAPPER NOU PENTRU GRUPARE ÎN LANDSCAPE -->
+    <div class="controls-wrapper">
         
-        <!-- HEADER CU LOGO -->
-        <div class="header-container">
-            <img src="logo_federatie.png" alt="Logo" class="logo" onerror="this.style.display='none'">
-            <h3>TIMER SPEEDSOFTRO</h3>
-        </div>
-
-        <!-- AUDIO PLAYER ASCUNS (.mp3) -->
-        <!-- ASIGURĂ-TE CĂ NUMELE FIȘIERULUI AICI ESTE CORECT! Ai zis că e wav sau mp3? Codul tău de mai sus avea mp3. -->
-        <audio id="airsoftAudio" src="competitie_audio.mp3" preload="auto"></audio>
-
-        <!-- CRONOMETRU PRINCIPAL -->
-        <div id="timerDisplay" class="timer-display">00:00</div>
-
         <!-- BUTOANE -->
         <div class="button-container">
             <button id="startBtn">▶️ <br> START</button>
